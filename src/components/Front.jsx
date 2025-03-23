@@ -5,10 +5,11 @@ import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import "./style.scss";
 import sticker from "../assets/sticker.svg";
+
 const RegisterBlock = () => {
-  let history = useNavigate();
+  const navigate = useNavigate();
   const Loginclick = () => {
-    history("/signin");
+    navigate("/signin");
   };
 
   return (
@@ -17,8 +18,7 @@ const RegisterBlock = () => {
         <h1>Make Headlines: Join & Write!</h1>
         <p className="small-content">We are always open to take you in</p>
         <p className="quote">
-          Transform campus conversations. Write your truth, share widely, and
-          lead change at your university
+          Transform campus conversations. Write your truth, share widely, and lead change at your university.
         </p>
       </div>
       <button onClick={Loginclick}>
@@ -28,45 +28,47 @@ const RegisterBlock = () => {
     </div>
   );
 };
+
 function Front({ setUserAuth, setCurrentEmail, currentemail }) {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const NEWS_URL = process.env.REACT_APP_NEWS_URL;
+
+  // Check for token and set authentication state
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token !== null) {
+    if (token) {
       const decoded = jwtDecode(token);
       setCurrentEmail(decoded.Email);
       setUserAuth(true);
     }
-  });
+  }, [setUserAuth, setCurrentEmail]); // Added dependency array
 
-  let loading = false;
-  const [data, setData] = useState([]);
+  // Fetch news data
   const getData = async () => {
-    const NEWS_URL=process.env.NEWS_URL;
+    setLoading(true);
     try {
       const response = await axios.get(`${NEWS_URL}/approvednewsData`);
       setData(response.data);
     } catch (error) {
       console.error("Error fetching data", error);
     } finally {
+      setLoading(false);
     }
   };
+
   useEffect(() => {
     getData();
   }, []);
-  useEffect(() => {
-    if (data.length > 0) {
-      console.log(data);
-    }
-  }, [data]);
+
   return (
     <div className="Front">
       <div className="NewsTile-container">
         {loading ? (
           Array.from({ length: 3 }).map((_, index) => (
-            <div
-              key={index}
-              className="mb-6 p-4 rounded-lg bg-white shadow-md"
-            ></div>
+            <div key={index} className="mb-6 p-4 rounded-lg bg-white shadow-md">
+              Loading...
+            </div>
           ))
         ) : data.length > 0 ? (
           data.map((newsItem, index) => (
@@ -74,7 +76,7 @@ function Front({ setUserAuth, setCurrentEmail, currentemail }) {
           ))
         ) : (
           <p className="text-center text-gray-600">
-            Sorry Nothing New : &#x28;
+            Sorry, nothing new 😞
           </p>
         )}
       </div>
