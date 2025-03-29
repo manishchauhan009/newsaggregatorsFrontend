@@ -49,7 +49,7 @@ function Newsdata({ currentemail }) {
 
 
     try {
-      const NEWS_URL=process.env.NEWS_URL;
+      const NEWS_URL=process.env.REACT_APP_NEWS_URL;
       const token = localStorage.getItem('token');
       const response = await axios.post(`${NEWS_URL}/createNews`, formData,{
         headers: { 'Authorization': `Bearer ${token}` }

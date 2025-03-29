@@ -28,7 +28,7 @@ function DetailedView() {
   },[])
 
   const liked = async () => {
-    const NEWS_URL=process.env.NEWS_URL;
+    const NEWS_URL=process.env.REACT_APP_NEWS_URL;
     const query = new URLSearchParams(window.location.search);
     const current=query.get('auth')
     try {
@@ -50,7 +50,7 @@ function DetailedView() {
   };
 
   const reported = async () => {
-    const NEWS_URL=process.env.NEWS_URL;
+    const NEWS_URL=process.env.REACT_APP_NEWS_URL;
     const query = new URLSearchParams(window.location.search);
     const current=query.get('auth')
     try {
@@ -73,7 +73,7 @@ function DetailedView() {
 
 
   const deletepost = async () => {
-    const NEWS_URL=process.env.NEWS_URL;
+    const NEWS_URL=process.env.REACT_APP_NEWS_URL;
     const query = new URLSearchParams(window.location.search);
     try {
       const response = await axios.post(`${NEWS_URL}/deletepost`, {

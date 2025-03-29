@@ -34,7 +34,7 @@ function Signin({ setUserAuth, currentuser, setCurrentEmail, setCurrentUser }) {
     history("/content");
   }, []);
   const submitHandler = async (e) => {
-    const USER_URL=process.env.USER_URL;
+    const USER_URL=process.env.REACT_APP_USER_URL;
     e.preventDefault();
     try {
       const response = await axios.post(`${USER_URL}/login`, {

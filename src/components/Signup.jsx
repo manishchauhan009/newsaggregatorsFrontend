@@ -17,7 +17,7 @@ function Signup() {
   }, []);
 
   const formSubmit = async (e) => {
-    const USER_URL=process.env.USER_URL;
+    const USER_URL=process.env.REACT_APP_USER_URL;
     e.preventDefault();
     if (Password !== ConfirmPassword) {
       toast.error("Passwords do not match!");

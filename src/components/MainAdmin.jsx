@@ -12,7 +12,7 @@ function MainAdmin() {
   const navigate = useNavigate();
 
   const isAdminFunc = async () => {
-    const USER_URL=process.env.USER_URL
+    const USER_URL=process.env.REACT_APP_USER_URL
     const token = localStorage.getItem('token');
     try {
       const response = await axios.post(`${USER_URL}/login/admin`, {}, {
@@ -33,7 +33,7 @@ function MainAdmin() {
   };
 
   const getData = async () => {
-    const NEWS_URL=process.env.NEWS_URL;
+    const NEWS_URL=process.env.REACT_APP_NEWS_URL;
     try {
       const response = await axios.get(`${NEWS_URL}/admin/news`);
       setData(response.data); // Set data received from API response
@@ -44,7 +44,7 @@ function MainAdmin() {
   };
 
   const handleApprove = async () => {
-    const NEWS_URL=process.env.NEWS_URL;
+    const NEWS_URL=process.env.REACT_APP_NEWS_URL;
     try {
       await axios.post(`${NEWS_URL}/admin/approve`, { id: selectedElement._id });
       toast.success("Article Approved");
@@ -57,7 +57,7 @@ function MainAdmin() {
   };
 
   const handleDeny = async (element) => {
-    const NEWS_URL=process.env.NEWS_URL;
+    const NEWS_URL=process.env.REACT_APP_NEWS_URL;
     if (!element) {
       console.error('No selected element to deny');
       return;
