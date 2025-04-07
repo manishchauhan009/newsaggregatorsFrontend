@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import Skeleton from "react-loading-skeleton";
 import 'react-loading-skeleton/dist/skeleton.css';
 import Tile from "./Tile";
 
@@ -43,17 +44,29 @@ function CategoryContent({ userauth }) {
     }
   }, [userauth, navigate]);
 
+  // Skeleton layout for Tile
+  const SkeletonTile = () => (
+    <div className="rounded-lg shadow-md p-4 bg-white mb-4 w-full max-w-md">
+      <Skeleton height={180} className="mb-4" />
+      <Skeleton count={2} />
+    </div>
+  );
+
   return (
-    <div className="CategoryContent">
+    <div className="CategoryContent px-4">
       <h1 className="text-2xl font-semibold mb-4 capitalize">{category}</h1>
       <button onClick={() => navigate("/")} className="All-news-bt mb-6">
         View All News
       </button>
 
       {loading ? (
-        <p className="text-center text-gray-500">Loading...</p>
+        <div className="NewsTile-container grid gap-4">
+          {Array(6).fill().map((_, i) => (
+            <SkeletonTile key={i} />
+          ))}
+        </div>
       ) : data.length > 0 ? (
-        <div className="NewsTile-container">
+        <div className="NewsTile-container grid gap-4">
           {data.map((newsItem, index) => (
             <Tile key={index} newsItem={newsItem} />
           ))}

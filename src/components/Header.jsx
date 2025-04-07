@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from "react";
 import pfp from "../assets/profile.svg";
 import { useNavigate } from "react-router-dom";
+import { FaBars, FaTimes } from "react-icons/fa";
+import '../App.css'
 
 function Header({ userauth, setUserAuth, setCurrentEmail }) {
   const [time, setTime] = useState(new Date());
+  const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   function clickHandler(e) {
     const selectedCategory = e.target.innerText;
+    setMenuOpen(false);
     if (selectedCategory === "Home") {
       navigate(`/`);
     } else {
       navigate(`/content/${selectedCategory}`);
-
     }
   }
 
@@ -49,6 +52,7 @@ function Header({ userauth, setUserAuth, setCurrentEmail }) {
   let hours = time.getHours();
   let minutes = time.getMinutes();
   let seconds = time.getSeconds();
+
   const items = [
     'Home', 'General', 'Training and Placement', 'System Support',
     'Entrepreneurship Development', 'Research and Development', 'Career Development', 'Admission', 'Social responsive',
@@ -78,7 +82,10 @@ function Header({ userauth, setUserAuth, setCurrentEmail }) {
           <span>paruluniversity.ac.in</span>
         </a>
       </div>
-      <nav className="navbar">
+
+
+      {/* Responsive Navbar */}
+      <nav className={`navbar ${menuOpen ? "open" : ""} gap-3`}>
         {first5Items.map((item, index) => (
           <p key={index} onClick={clickHandler} className="nav-item">
             {item}
@@ -89,7 +96,7 @@ function Header({ userauth, setUserAuth, setCurrentEmail }) {
             {remainingItems.map((item, index) => (
               <p key={index} className="dropdown-item" onClick={clickHandler}>
                 {item}
-              </p>  // ✅ This is now correctly nested inside <div> instead of <p>
+              </p>
             ))}
           </div>
         </div>
@@ -97,21 +104,19 @@ function Header({ userauth, setUserAuth, setCurrentEmail }) {
         <div className="profile-container">
           <div className="login-controls">
             {userauth ? (
-              <button onClick={logoutHandler} className="">
-                Logout
-              </button>
+              <button onClick={logoutHandler}>Logout</button>
             ) : (
-              <button onClick={loginHandler} className="">
-                Login
-              </button>
+              <button onClick={loginHandler}>Login</button>
             )}
           </div>
-          <img onClick={() => {
-            navigate("/content")
-          }} src={pfp} alt="Profile" className="" title="go to profile" />
+          <img
+            onClick={() => navigate("/content")}
+            src={pfp}
+            alt="Profile"
+            className="profile-img"
+            title="Go to profile"
+          />
         </div>
-
-
       </nav>
     </div>
   );
