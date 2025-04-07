@@ -1,151 +1,123 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import like from "../assets/like.svg";
-import share from "../assets/share.svg";
-import feedback from "../assets/feedback.svg";
-import report from "../assets/report.svg"
-import trash from "../assets/trash.svg";
-import { useNavigate} from "react-router-dom";
+import likeIcon from "../assets/like.svg";
+import shareIcon from "../assets/share.svg";
+import feedbackIcon from "../assets/feedback.svg";
+import reportIcon from "../assets/report.svg";
+import trashIcon from "../assets/trash.svg";
 import "./style.scss";
+
 function DetailedView() {
-  let history = useNavigate();
   const { id } = useParams();
+  const navigate = useNavigate();
   const [newsItem, setNewsItem] = useState(null);
-  const [flag,setflag]=useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [reportCount, setReportCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [like1,setlike1]=useState(0)
-  console.log("renrendered")
 
-  const [reported1,setreported1]=useState(0);
   const query = new URLSearchParams(window.location.search);
+  const currentUser = query.get('auth');
 
-  useEffect(()=>{
-    if (query.get('auth')==="admin@gmail.com"){
-      setflag(true)
+  useEffect(() => {
+    if (currentUser === "admin@gmail.com") {
+      setIsAdmin(true);
     }
 
-  },[])
+    const data = query.get('data');
+    if (data) {
+      const decodedData = JSON.parse(decodeURIComponent(data));
+      setNewsItem(decodedData);
+      setLikeCount(decodedData.Like);
+      setLoading(false);
+    } else {
+      setLoading(false);
+    }
+  }, []);
 
-  const liked = async () => {
-    const NEWS_URL=process.env.REACT_APP_NEWS_URL;
-    const query = new URLSearchParams(window.location.search);
-    const current=query.get('auth')
+  const handleLike = async () => {
+    const NEWS_URL = process.env.REACT_APP_NEWS_URL;
     try {
       const response = await axios.post(`${NEWS_URL}/verifylike`, {
         newsid: newsItem._id,
-        currentemail:current
+        currentemail: currentUser,
       });
-      if (response.data===0){
-        console.log("check1")
-
+      if (response.data !== 0) {
+        setLikeCount(likeCount + 1);
       }
-      else{
-        setlike1(like1+1);
-      }
-      console.log(response.data)
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error liking article:", error);
     }
   };
 
-  const reported = async () => {
-    const NEWS_URL=process.env.REACT_APP_NEWS_URL;
-    const query = new URLSearchParams(window.location.search);
-    const current=query.get('auth')
+  const handleReport = async () => {
+    const NEWS_URL = process.env.REACT_APP_NEWS_URL;
     try {
       const response = await axios.post(`${NEWS_URL}/reported`, {
         newsid: newsItem._id,
-        currentemail:current
+        currentemail: currentUser,
       });
-      if (response.data===0){
-        console.log("stayed");
-
+      if (response.data !== 0) {
+        setReportCount(reportCount + 1);
       }
-      else{
-        setreported1(reported1+1);
-      }
-      console.log(response.data)
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error reporting article:", error);
     }
   };
 
-
-  const deletepost = async () => {
-    const NEWS_URL=process.env.REACT_APP_NEWS_URL;
-    const query = new URLSearchParams(window.location.search);
+  const handleDelete = async () => {
+    const NEWS_URL = process.env.REACT_APP_NEWS_URL;
     try {
-      const response = await axios.post(`${NEWS_URL}/deletepost`, {
+      await axios.post(`${NEWS_URL}/deletepost`, {
         newsid: newsItem._id,
       });
-      
+      setTimeout(() => {
+        navigate("/");
+      }, 1000);
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error deleting article:", error);
     }
   };
-  
 
-  useEffect(() => {
-    const query = new URLSearchParams(window.location.search);
-    const data = query.get('data');
-    const decodedObject = JSON.parse(decodeURIComponent(data));
-    setLoading(false)
-    setNewsItem(decodedObject)
-    
-    
-
-  }, []);
-  useEffect(()=>{
-    if (newsItem!==null){
-      setlike1(newsItem.Like);
-    }
-    console.log(newsItem,"checkitem")
-  },[newsItem])
   if (loading) return <p>Loading...</p>;
   if (!newsItem) return <p>News item not found</p>;
 
   return (
     <div className="DetailedView">
-        <h1 className="">{newsItem.Title}</h1>
-        <div className="little-things">
-          <p className="">Author: {newsItem.Owner}</p>
-          <p className="">Category: {newsItem.Group}</p>
-          <p className="">{newsItem.Date}</p>
-          <div className="extras">
+      <h1>{newsItem.Title}</h1>
+      <div className="little-things">
+        <p>Author: {newsItem.Owner}</p>
+        <p>Category: {newsItem.Group}</p>
+        <p>{newsItem.Date}</p>
+
+        <div className="extras">
           <span className='likes'>
-          {like1}
-          <img src={like} onClick={()=>{
-            liked();
-          }} title='like article' alt='Like Article'/>
+            {likeCount}
+            <img src={likeIcon} onClick={handleLike} title='Like Article' alt='Like' />
           </span>
-          <img src={share} title='share article' alt='Share Article'/>
-          <a href="mailto:support@yourwebsite.com?subject=Support Inquiry&body=Hello, I need help with..."><img src={feedback} title='share feedback' alt='Feedback'/></a>
-          <img onClick={()=>{
-            reported();
-          }} src={report} title='report article'/>
-          {flag&&<button onClick={()=>{
-            deletepost()
-            
-            setTimeout(() => {
-              history("/")
-              
-              
-            }, 1000);
-          }} className='delete-bt'>
-            <img src={trash} alt="Trash Can" title='delete Article'/>
-          </button>}
+
+          <img src={shareIcon} title='Share Article' alt='Share' />
+
+          <a href="mailto:support@yourwebsite.com?subject=Support Inquiry&body=Hello, I need help with...">
+            <img src={feedbackIcon} title='Share Feedback' alt='Feedback' />
+          </a>
+
+          <img src={reportIcon} onClick={handleReport} title='Report Article' alt='Report' />
+
+          {isAdmin && (
+            <button onClick={handleDelete} className='delete-bt'>
+              <img src={trashIcon} alt="Delete" title='Delete Article' />
+            </button>
+          )}
         </div>
-        </div>
-        <div className="img-container">
-          <img
-            src={newsItem.imgUrl}
-            alt={newsItem.Title}
-            className=""
-          />
-        </div>
-        {/* <p className="content">{newsItem.Content}</p> */}
-        <div className='content' dangerouslySetInnerHTML={{ __html: newsItem.Content }} />
+      </div>
+
+      <div className="img-container">
+        <img src={newsItem.imgUrl} alt={newsItem.Title} />
+      </div>
+
+      <div className='content' dangerouslySetInnerHTML={{ __html: newsItem.Content }} />
     </div>
   );
 }

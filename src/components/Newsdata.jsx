@@ -1,61 +1,41 @@
 import { useState } from "react";
 import axios from "axios";
-import toast, { Toaster } from 'react-hot-toast';
+import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import './style.scss';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import "./style.scss";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 function Newsdata({ currentemail }) {
-  const [Dept, setDept] = useState("Not Selected");
-  const [Owner,setOwner]=useState(currentemail);
-  const route = useNavigate();
-  const group = Dept;
-  const [value, setValue] = useState('');
-  // const date = new Date().toLocaleString();
-
-  const Approved = false;
-  const Like = 0;
-  const Reported = 0;
+  const [Dept, setDept] = useState("General");
   const [Title, setTitle] = useState("");
   const [Content, setContent] = useState("");
   const [imgUrl, setImgUrl] = useState(null);
-
-  const navigate=useNavigate();
-  const handleTitleChange = (e) => setTitle(e.target.value);
-  const handleContentChange = (e) => setContent(e.target.value);
-  const handleFileChange = (e) => setImgUrl(e.target.files[0]);
+  const navigate = useNavigate();
 
   const formSubmit = async (e) => {
     e.preventDefault();
-    // if (Dept === "Not Selected") {
-    //   toast.error("Not Selected Department");
-    //   return;
-    // }
 
     const formData = new FormData();
-    formData.append('Group', group);
-    formData.append('Owner', Owner);
-    // formData.append('date', date);
-    formData.append('Title', Title);
-    formData.append('Content', Content);
-    formData.append('imgUrl', imgUrl);
-    formData.append('Like', Like);
-    formData.append('Reported', Reported);
-    formData.append('Approved', Approved);
-
-
-    // formData.append('currentemail', currentemail);
-
+    formData.append("Group", Dept);
+    formData.append("Owner", currentemail);
+    formData.append("Title", Title);
+    formData.append("Content", Content);
+    formData.append("imgUrl", imgUrl);
+    formData.append("Like", 0);
+    formData.append("Reported", 0);
+    formData.append("Approved", false);
 
     try {
-      const NEWS_URL=process.env.REACT_APP_NEWS_URL;
-      const token = localStorage.getItem('token');
-      const response = await axios.post(`${NEWS_URL}/createNews`, formData,{
-        headers: { 'Authorization': `Bearer ${token}` }
+      const NEWS_URL = process.env.REACT_APP_NEWS_URL;
+      const token = localStorage.getItem("token");
+
+      await axios.post(`${NEWS_URL}/createNews`, formData, {
+        headers: { Authorization: `Bearer ${token}` },
       });
+
       toast.success(`News Request Successfully Sent to ${Dept}`);
-      route("/content")
+      navigate("/content");
     } catch (error) {
       console.error(error);
       toast.error("Error submitting news request");
@@ -63,20 +43,36 @@ function Newsdata({ currentemail }) {
   };
 
   return (
-
     <div id="me" className="news-data-container">
-      <Toaster/>
-        <h1><button title='go back' className='back-bt' onClick={()=>{navigate(`/content`);}}>&#129128;</button>You are Writing an Article</h1>
+      <Toaster />
+      <h1>
+        <button title="Go Back" className="back-bt" onClick={() => navigate("/content")}>
+          &#129128;
+        </button>
+        You are Writing an Article
+      </h1>
+
       <form onSubmit={formSubmit} className="news-form">
         <label>
           Title
-          <input type="text" required onChange={handleTitleChange} placeholder="Article Your Article Name" name="title" className="title-input" />
+          <input
+            type="text"
+            required
+            value={Title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Article Title"
+            className="title-input"
+          />
         </label>
+
         <label>
           Category
-          <select onChange={(e) => setDept(e.target.value)} className="category-select">
-          <option value="General">General</option>
-
+          <select
+            value={Dept}
+            onChange={(e) => setDept(e.target.value)}
+            className="category-select"
+          >
+            <option value="General">General</option>
             <option value="Training and Placement">Training and Placement Cell</option>
             <option value="Armed Forces and Motivation">Armed Forces and Motivation Cell</option>
             <option value="Career Development">Career Development Cell</option>
@@ -92,20 +88,30 @@ function Newsdata({ currentemail }) {
           </select>
           <p className="selected-category">Selected Category: {Dept}</p>
         </label>
+
         <label>
           Content
-          {/* <textarea required onChange={handleContentChange} className="content-textarea" placeholder="Write Your news here!"></textarea> */}
-          <div className="">
-          <ReactQuill theme="snow" value={Content} className="h-[30vh] mb-10"  onChange={setContent} />
-
-          </div>
-          
+          <ReactQuill
+            theme="snow"
+            value={Content}
+            onChange={setContent}
+            className="h-[30vh] mb-10"
+          />
         </label>
+
         <label>
           Media
-          <input type="file" required onChange={handleFileChange} className="media-input" />
+          <input
+            type="file"
+            required
+            onChange={(e) => setImgUrl(e.target.files[0])}
+            className="media-input"
+          />
         </label>
-        <button className="submit-bt" type="submit">Submit Request</button>
+
+        <button type="submit" className="submit-bt">
+          Submit Request
+        </button>
       </form>
     </div>
   );

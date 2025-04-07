@@ -5,74 +5,63 @@ import toast, { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 function MainAdmin() {
-  const route = useNavigate();
+  const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
   const [data, setData] = useState([]);
   const [selectedElement, setSelectedElement] = useState(null);
-  const navigate = useNavigate();
 
   const isAdminFunc = async () => {
-    const USER_URL=process.env.REACT_APP_USER_URL
+    const USER_URL = process.env.REACT_APP_USER_URL;
     const token = localStorage.getItem('token');
     try {
       const response = await axios.post(`${USER_URL}/login/admin`, {}, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
-      console.log(response);
       if (response.status === 200) {
         setIsAdmin(true);
-        route('/admin');
       } else {
         setIsAdmin(false);
       }
     } catch (error) {
-      console.log("Error Message");
-      console.error(error);
+      console.error("Admin check failed:", error);
       setIsAdmin(false);
     }
   };
 
   const getData = async () => {
-    const NEWS_URL=process.env.REACT_APP_NEWS_URL;
+    const NEWS_URL = process.env.REACT_APP_NEWS_URL;
     try {
       const response = await axios.get(`${NEWS_URL}/admin/news`);
-      setData(response.data); // Set data received from API response
-      console.log(data);
+      setData(response.data);
     } catch (error) {
-      console.error("Error fetching data", error);
+      console.error("Error fetching news data:", error);
     }
   };
 
   const handleApprove = async () => {
-    const NEWS_URL=process.env.REACT_APP_NEWS_URL;
+    const NEWS_URL = process.env.REACT_APP_NEWS_URL;
     try {
       await axios.post(`${NEWS_URL}/admin/approve`, { id: selectedElement._id });
       toast.success("Article Approved");
       setSelectedElement(null);
-      getData(); // Refresh the data after approval
+      getData();
     } catch (error) {
-      console.error("Error approving article", error);
+      console.error("Error approving article:", error);
       toast.error("Error approving article");
     }
   };
 
   const handleDeny = async (element) => {
-    const NEWS_URL=process.env.REACT_APP_NEWS_URL;
-    if (!element) {
-      console.error('No selected element to deny');
-      return;
-    }
-
+    const NEWS_URL = process.env.REACT_APP_NEWS_URL;
     try {
       await axios.post(`${NEWS_URL}/admin/deny`, { id: element._id });
       toast.success("Article Denied");
-      if (selectedElement && selectedElement._id === element._id) {
+      if (selectedElement?._id === element._id) {
         setSelectedElement(null);
       }
-      getData(); // Refresh the data after denial
+      getData();
     } catch (error) {
-      console.log(element);
-      console.error("Error denying article", error);
+      console.error("Error denying article:", error);
       toast.error("Error denying article");
     }
   };
@@ -87,21 +76,9 @@ function MainAdmin() {
     }
   }, [isAdmin]);
 
-  const handleTileClick = (element) => {
-    setSelectedElement(element);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedElement(null);
-  };
-
-  const goBack =()=>{
-    navigate(`/content`);
-  }
-
   const Tile = ({ element }) => (
     <div className='tile'>
-      <div onClick={() => handleTileClick(element)}>
+      <div onClick={() => setSelectedElement(element)}>
         <h2>{element.Title}</h2>
         <p>Sender: {element.Owner}</p>
         <span>{element.Date}</span>
@@ -117,9 +94,7 @@ function MainAdmin() {
         <h2>{element.Title}</h2>
         <p>{element.Date}</p>
         <img src={element.imgUrl} alt={element.Title} />
-        {/* <p className='content'>{element.Content}</p> */}
-        <div class='content' className='flex flex-col' dangerouslySetInnerHTML={{ __html: element.Content }} />
-
+        <div className='content' dangerouslySetInnerHTML={{ __html: element.Content }} />
         <div>
           <button className='approve' onClick={handleApprove}>Approve</button>
           <button className='deny' onClick={() => handleDeny(element)}>Deny</button>
@@ -127,20 +102,25 @@ function MainAdmin() {
       </div>
     </div>
   );
-  
+
   return (
     <>
       <Toaster />
       {isAdmin ? (
         <div className='admin-panel'>
-          <h1><button title='go back' className='back-bt' onClick={goBack}>&#129128;</button>Admin Panel</h1>
+          <h1>
+            <button title='Go back' className='back-bt' onClick={() => navigate('/content')}>
+              &#129128;
+            </button>
+            Admin Panel
+          </h1>
           <div className='tiles'>
             {data.map((element) => (
               <Tile key={element._id} element={element} />
             ))}
           </div>
           {selectedElement && (
-            <Modal element={selectedElement} onClose={handleCloseModal} />
+            <Modal element={selectedElement} onClose={() => setSelectedElement(null)} />
           )}
         </div>
       ) : (
