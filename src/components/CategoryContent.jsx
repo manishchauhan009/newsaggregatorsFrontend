@@ -11,17 +11,23 @@ function CategoryContent({ userauth }) {
   const navigate = useNavigate();
 
   const fetchCategoryData = async () => {
-    const NEWS_URL=process.env.NEWS_URL;
+    const NEWS_URL = process.env.REACT_APP_NEWS_URL;
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.post(`${NEWS_URL}/categoryData`, {
-        category: category,
-      }, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      setData(response.data);
+      const response = await axios.post(
+        `${NEWS_URL}/categoryData`,
+        { category },
+        { headers: { 'Authorization': `Bearer ${token}` } }
+      );
+      if (Array.isArray(response.data)) {
+        setData(response.data);
+      } else {
+        console.warn("Expected array but got:", response.data);
+        setData([]);
+      }
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching category data", error);
+      setData([]);
     } finally {
       setLoading(false);
     }
@@ -31,24 +37,21 @@ function CategoryContent({ userauth }) {
     fetchCategoryData();
   }, [category]);
 
-  const handleOnClick = () => {
-    navigate("/");
-  };
-
-  if (!userauth) {
-    navigate("/signin");
-    return null;
-  }
+  useEffect(() => {
+    if (!userauth) {
+      navigate("/signin");
+    }
+  }, [userauth, navigate]);
 
   return (
     <div className="CategoryContent">
-      <h1>{category}</h1>
-      <button onClick={handleOnClick} className="All-news-bt">
+      <h1 className="text-2xl font-semibold mb-4 capitalize">{category}</h1>
+      <button onClick={() => navigate("/")} className="All-news-bt mb-6">
         View All News
       </button>
 
       {loading ? (
-        <p>Loading...</p>
+        <p className="text-center text-gray-500">Loading...</p>
       ) : data.length > 0 ? (
         <div className="NewsTile-container">
           {data.map((newsItem, index) => (
