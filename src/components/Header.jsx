@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import pfp from "../assets/profile.svg";
 import { useNavigate } from "react-router-dom";
-import { FaBars, FaTimes } from "react-icons/fa";
 import '../App.css'
 
 function Header({ userauth, setUserAuth, setCurrentEmail }) {
